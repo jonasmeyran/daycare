@@ -10,6 +10,9 @@ class Child:
         self.toddler = {"classroom": None, "start_date": None, "transition_date": None}
         self.preschool = {"classroom": None, "start_date": None, "transition_date": None}
 
+    def __getattribute__(self, name: str) -> Any:
+        return super().__getattribute__(name)
+
     def modify_date_of_birth(self, date: date):
         self.date_of_birth = date
 
@@ -25,6 +28,3 @@ class Child:
     def compute_age_in_months(self, current_date: date) -> int:
         delta = relativedelta(current_date, self.date_of_birth)
         return delta.years * 12 + delta.months
-
-    def __getattribute__(self, name: str) -> Any:
-        return super().__getattribute__(name)
