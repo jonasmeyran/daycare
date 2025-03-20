@@ -34,11 +34,11 @@ class Classroom:
         del self.date_dict[date]
 
     def add_child(self, child: Child):
-        self.list_of_children.append(child)
-
         for stage in [child.infant, child.toddler, child.preschool]:
             
             if stage['classroom'] == self.name:
+                self.list_of_children.append(child)
+
                 current_date = max(stage['start_date'], min(self.date_dict))
                 end_date = min(stage['transition_date'] - timedelta(days=1), max(self.date_dict))
                 
@@ -49,17 +49,28 @@ class Classroom:
                 break
 
     def delete_child(self, child: Child):
-        self.list_of_children.remove(child)
-
-        for date in self.date_dict:
-            if child.name in self.date_dict[date]:
-                self.date_dict[date].remove(child.name)
+        if child in self.list_of_children:
+            self.list_of_children.remove(child)
+            
+            for date in self.date_dict:
+                if child.name in self.date_dict[date]:
+                    self.date_dict[date].remove(child.name)
 
     # Vacancy calculation
 
-    def vacant_places_on_date(self, date: date) -> int:
+    def compute_vacant_places_on_date(self, date: date) -> int:
         nb_children = len(self.date_dict[date])
         return self.max_size - nb_children
+    
+    def compute_vacant_places_on_period(self, start_date: date, end_date: date) -> int:
+        vacant_places = 0
+        
+        current_date = start_date
+        while current_date <= end_date:
+            vacant_places += self.compute_vacant_places_on_date(current_date)
+            current_date += timedelta(days=1)
+
+        return vacant_places
 
     def compute_vacant_places_rate_on_date(self, date: date) -> float:
         nb_children = len(self.date_dict[date])

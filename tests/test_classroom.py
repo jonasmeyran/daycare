@@ -110,12 +110,20 @@ class TestClassroom(TestBase):
     
     # Vacancy calculation
 
-    def test_vacant_places_on_date(self):
+    def test_compute_vacant_places_on_date(self):
         self.classroomI1.create_date_dict(start_date=date(2024,8,6), end_date=date(2024,8,12))
         self.classroomI1.add_child(child=self.child1)
 
-        vacant_places = self.classroomI1.vacant_places_on_date(date(2024,8,7))
+        vacant_places = self.classroomI1.compute_vacant_places_on_date(date(2024,8,7))
         self.assertEqual(vacant_places, 9)
+
+    def test_compute_vacant_places_on_period(self):
+        self.classroomI1.create_date_dict(start_date=date(2024,8,6), end_date=date(2024,8,12))
+        self.classroomI1.add_child(child=self.child1)
+
+        vacant_places_rate1 = self.classroomI1.compute_vacant_places_on_period(date(2024,8,6), date(2024,8,11))
+        
+        self.assertEqual(vacant_places_rate1, 58)
 
     def test_compute_vacant_places_rate_on_date(self):
         self.classroomI1.create_date_dict(start_date=date(2024,8,6), end_date=date(2024,8,12))
