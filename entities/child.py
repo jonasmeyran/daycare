@@ -1,6 +1,5 @@
 from datetime import date
 from dateutil.relativedelta import relativedelta
-from typing import Any
 
 class Child:
     def __init__(self, name: str, date_of_birth: date):
@@ -9,9 +8,6 @@ class Child:
         self.infant = {"classroom": None, "start_date": None, "transition_date": None}
         self.toddler = {"classroom": None, "start_date": None, "transition_date": None}
         self.preschool = {"classroom": None, "start_date": None, "transition_date": None}
-
-    def __getattribute__(self, name: str) -> Any:
-        return super().__getattribute__(name)
 
     def modify_date_of_birth(self, date: date):
         self.date_of_birth = date

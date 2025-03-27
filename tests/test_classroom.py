@@ -156,7 +156,7 @@ class TestClassroom(TestBase):
                                      (date(2024, 8, 8), date(2024, 8, 10), 10)]
         self.assertEqual(self.classroomI1.vacant_places_intervals(), vacant_positions_interval)
 
-    # Child categorization
+    # Information
 
     def test_categorize_start_and_transition_age(self):
         self.assertEqual(self.classroomI1.categorize_start_age(self.child_A), 'A')
@@ -174,11 +174,44 @@ class TestClassroom(TestBase):
     def test_update_categories_distribution(self):
         self._setup_test_update_categories_distribution()
 
-        self.assertEqual(self.classroomI1.start_categories, {"A": 1, "B": 0, "C": 0, "D": 0})
-        self.assertEqual(self.classroomI1.transition_categories, {"A": 1, "B": 0, "C": 0, "D": 0})
+        self.assertEqual(self.classroomI1.start_categories, {"A": ["Alex"], "B": [], "C": [], "D": []})
+        self.assertEqual(self.classroomI1.transition_categories, {"A": ["Alex"], "B": [], "C": [], "D": []})
 
-        self.assertEqual(self.classroomT1.start_categories, {"A": 0, "B": 1, "C": 1, "D": 1})
-        self.assertEqual(self.classroomT1.transition_categories, {"A": 0, "B": 1, "C": 1, "D": 1})
+        self.assertEqual(self.classroomT1.start_categories, {"A": [], "B": ["Ben"], "C": ["Charles"], "D": ["David"]})
+        self.assertEqual(self.classroomT1.transition_categories, {"A": [], "B": ["Ben"], "C": ["Charles"], "D": ["David"]})
+
+    def test_get_transitions_of_the_month(self):
+        self.classroomI1.create_date_dict(start_date=date(2024,8,4), end_date=date(2024,8,12))
+        self.classroomI1.add_child(child=self.child1)
+        self.classroomI1.add_child(child=self.child2)
+
+        transitions_of_the_month = self.classroomI1.get_transitions_of_the_month(month=8, year=2024)
+        
+        self.assertEqual(transitions_of_the_month, {date(2024, 8, 8): [("Aiden Chan", "TODDLER1"),
+                                                                       ("Emma Martinez", "TODDLER1")]
+                                                    })
+        
+        child3 = Child(name='Damien Don', date_of_birth=date(2023, 8, 12))
+        child3.add_infant(classroom='INFANT1', start_date=date(2024, 8, 6), transition_date=date(2024, 8, 9))
+        self.classroomI1.add_child(child=child3)
+
+        transitions_of_the_month = self.classroomI1.get_transitions_of_the_month(month=8, year=2024)
+
+        self.assertEqual(transitions_of_the_month, {date(2024, 8, 8): [("Aiden Chan", "TODDLER1"),
+                                                                       ("Emma Martinez", "TODDLER1")],
+                                                    date(2024, 8, 9): ["Damien Don"]
+                                                    })
+        
+        child4 = Child(name='Luis Meny', date_of_birth=date(2023, 8, 12))
+        child4.add_infant(classroom='INFANT1', start_date=date(2024, 8, 6), transition_date=date(2024, 7, 9))
+        self.classroomI1.add_child(child=child4)
+
+        transitions_of_the_month = self.classroomI1.get_transitions_of_the_month(month=8, year=2024)
+
+        self.assertEqual(transitions_of_the_month, {date(2024, 8, 8): [("Aiden Chan", "TODDLER1"),
+                                                                       ("Emma Martinez", "TODDLER1")],
+                                                    date(2024, 8, 9): ["Damien Don"]
+                                                    })
 
     # Validation
 

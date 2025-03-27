@@ -111,17 +111,23 @@ class TestDaycare(TestBase):
         
         self.assertEqual(vacant_places_rate, 100 * 174/180)
 
-    # Child categorization
+    # Information
 
     def test_update_categories_distributions(self):
         self._setup_test_update_categories_distribution()
-
-        self.assertEqual(self.daycare.get_classroom('INFANT1').start_categories, {"A": 1, "B": 0, "C": 0, "D": 0})
-        self.assertEqual(self.daycare.get_classroom('INFANT2').start_categories, {"A": 0, "B": 0, "C": 0, "D": 0})
-        self.assertEqual(self.daycare.get_classroom('TODDLER1').start_categories, {"A": 0, "B": 1, "C": 0, "D": 0})
-        self.assertEqual(self.daycare.get_classroom('PRESCHOOL1').start_categories, {"A": 0, "B": 0, "C": 1, "D": 0})
-
         self.assertEqual(self.daycare.start_categories, {"A": 1, "B": 1, "C": 1, "D": 0})
+
+    def test_get_transitions_of_the_month(self):
+        self.daycare.create_date_dicts(start_date=date(2024,8,4), end_date=date(2024,8,12))
+        self.daycare.add_child(self.child1)
+        self.daycare.add_child(self.child2)
+
+
+        transitions_of_the_month = {"INFANT1": {date(2024, 8, 8): [("Aiden Chan", "TODDLER1"),
+                                                                   ("Emma Martinez", "TODDLER1")]},
+                                    "TODDLER1": {date(2024, 8, 10): ["Aiden Chan", "Emma Martinez"]}}
+
+        self.assertEqual(self.daycare.get_transitions_of_the_month(month=8, year=2024), transitions_of_the_month)
 
     # Validation
 
@@ -130,6 +136,16 @@ class TestDaycare(TestBase):
 
         self.assertEqual(self.daycare.meets_the_stardards(), True)
 
+    def test_get_specific_categories(self):
+        self._setup_test_update_categories_distribution()
+
+        specific_categories_A = {"start": {"INFANT1": ["Aaron"]}, 
+                                "transition": {"INFANT1": ["Aaron"], "TODDLER1": ["Aaron"], "PRESCHOOL1": ["Aaron"]}} 
+        specific_categories_B = {"start": {"TODDLER1": ["Aaron"]}, 
+                                 "transition": {}}
+
+        self.assertEqual(self.daycare.get_specific_categories(letter="A"), specific_categories_A)
+        self.assertEqual(self.daycare.get_specific_categories(letter="B"), specific_categories_B)
 
 if __name__ == '__main__':
     unittest.main()

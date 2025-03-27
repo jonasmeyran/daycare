@@ -1,6 +1,6 @@
 from entities import Child
 from datetime import date, timedelta
-from typing import Any
+from typing import List
 from typing import Literal
 
 
@@ -15,12 +15,9 @@ class Classroom:
         self.transition_normal_age = transition_normal_age
         self.transition_max_age = transition_max_age
         self.date_dict = {}  # composition of the classroom for each date
-        self.start_categories = {"A": 0, "B": 0, "C": 0, "D": 0}
-        self.transition_categories = {"A": 0, "B": 0, "C": 0, "D": 0}
+        self.start_categories = {"A": [], "B": [], "C": [], "D": []}
+        self.transition_categories = {"A": [], "B": [], "C": [], "D": []}
         self.list_of_children = []
-
-    def __getattribute__(self, name: str) -> Any:
-        return super().__getattribute__(name)
 
     # Calendar and child management
 
@@ -108,7 +105,7 @@ class Classroom:
 
         return intervals
     
-    # Child categorization
+    # Information
 
     def categorize_start_age(self, child: Child) -> Literal['A', 'B', 'C', 'D']:
         for stage in [child.infant, child.toddler, child.preschool]:
@@ -138,11 +135,42 @@ class Classroom:
 
     def update_categories_distribution(self):
         for child in self.list_of_children:
-            self.start_categories[self.categorize_start_age(child)] += 1
-            self.transition_categories[self.categorize_transition_age(child)] += 1
+            self.start_categories[self.categorize_start_age(child)].append(child.name)
+            self.transition_categories[self.categorize_transition_age(child)].append(child.name)
+    
+    @staticmethod
+    def __get_days_of_the_month(month: int, year: int) -> dict:
+        current = date(year, month, 1)
+        days = {}
+
+        while current.month == month:
+            days[current] = []
+            current += timedelta(days=1)
+
+        return days
+
+    def get_transitions_of_the_month(self, month: int, year: int) -> dict:
+
+        days = self.__get_days_of_the_month(month, year)
+
+        for child in self.list_of_children:
+            stages = [child.infant, child.toddler, child.preschool]
+
+            for i, current_stage in enumerate(stages):
+                if current_stage['classroom'] == self.name:
+                    transition_date = current_stage['transition_date']
+                    
+                    if transition_date in days:
+                        if i + 1 < len(stages) and stages[i + 1]['classroom']:
+                            days[transition_date].append((child.name, stages[i + 1]['classroom']))
+                        else:
+                            days[transition_date].append(child.name)
+        
+        days = {day: names for day, names in days.items() if names}
+
+        return days
 
     # Validation
 
     def meets_the_stardards(self):
-        return self.start_categories["D"] == 0 and self.transition_categories["D"] == 0
-            
+        return len(self.start_categories["D"]) == 0 and len(self.transition_categories["D"]) == 0

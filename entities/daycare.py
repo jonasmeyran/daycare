@@ -1,6 +1,5 @@
 from entities import Child, Classroom
 from datetime import date
-from typing import Any
 
 class Daycare:
     def __init__(self) -> None:
@@ -84,21 +83,41 @@ class Daycare:
         
         return 100 * vacant_places / (total_size_stage * (difference.days + 1))
 
-    # Child categorization
+    # Information
 
     def update_categories_distributions(self):
         for classroom in self.classrooms.values():
             classroom.update_categories_distribution()
             
-            self.start_categories = {key: self.start_categories[key] + classroom.start_categories[key] 
+            self.start_categories = {key: self.start_categories[key] + len(classroom.start_categories[key]) 
                                              for key in self.start_categories}
-            self.transition_categories = {key: self.transition_categories[key] + classroom.transition_categories[key] 
+            self.transition_categories = {key: self.transition_categories[key] + len(classroom.transition_categories[key]) 
                                              for key in self.transition_categories}
+            
+    def get_transitions_of_the_month(self, month: int, year: int) -> dict:
+        transitions_of_the_month = {}
+        
+        for classroom in self.classrooms.values():
+            transitions_of_the_month[classroom.name] = classroom.get_transitions_of_the_month(month=month, year=year)
+
+        transitions_of_the_month = {classroom_name: names for classroom_name, names in transitions_of_the_month.items() if names}
+
+        return transitions_of_the_month
 
     # Validation
 
     def meets_the_stardards(self):
         return self.start_categories["D"] == 0 and self.transition_categories["D"] == 0
+    
+    def get_specific_categories(self, letter):
+        specific_categories = {"start": {}, "transition": {}}
+        
+        for classroom in self.classrooms.values():
+            if len(classroom.start_categories[letter]):
+                specific_categories["start"][classroom.name] = classroom.start_categories[letter]
+            if len(classroom.transition_categories[letter]):
+                specific_categories["transition"][classroom.name] = classroom.transition_categories[letter]
+        return specific_categories
     
     # Cost
 
